@@ -4,7 +4,7 @@
   "description": "PyVista demo web application frontend.",
   "private": true,
   "author": "Alex Kaszynski <akascap@gmail.com> (https://github.com/akaszynski)",
-  "repository": "github:pyvista/pyvista-webapp-fastapi",
+  "repository": "github:pyvista/pyvista-fastapi-webapp",
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
@@ -17,7 +17,6 @@
     "@react-three/fiber": "^8.15.16",
     "@react-three/postprocessing": "^2.16.2",
     "axios": "^1.6.7",
-    "leva": "^0.9.35",
     "next": "14.1.0",
     "react": "^18",
     "react-dom": "^18",
@@ -32,8 +31,6 @@
     "@types/uuid": "^9.0.8",
     "autoprefixer": "^10.4.17",
     "eslint": "^8.57.0",
-    "identity-obj-proxy": "^3.0.0",
-    "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.4.2"
   }

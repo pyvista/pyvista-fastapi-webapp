@@ -1,4 +1,3 @@
-import { useControls } from "leva";
 import React, { useEffect, useRef, useState, FC } from "react";
 import * as THREE from "three";
 import { Canvas, useThree } from "@react-three/fiber";
@@ -92,7 +91,6 @@ const MeshComponent: FC<MeshComponentProps> = ({
         linewidth: 1,
       });
       const edges = new LineSegments(edgesGeometry, edgesMaterial);
-      console.log("edges:", edges);
       edgesRef.current = edges;
       scene.add(edges);
     }
@@ -110,7 +108,7 @@ const MeshComponent: FC<MeshComponentProps> = ({
     if (meshRef.current) {
       scene.add(meshRef.current);
     }
-  }, [vertices, faces]);
+  }, [vertices, faces, bounds, scene, showEdges]);
 
   useEffect(() => {
     if (meshRef.current) {
@@ -130,23 +128,7 @@ type ViewerProps = {
 
 const Viewer: React.FC<ViewerProps> = ({ surfaceData }) => {
   const [showSurface, setShowSurface] = useState(true);
-  const [showSSAO, setShowSSAO] = useState(true);
   const [showEdges, setShowEdges] = useState(false);
-
-  useControls(
-    "View Settings",
-    {
-      "Show Surface": {
-        value: showSurface,
-        onChange: (v) => setShowSurface(v),
-      },
-      SSAO: {
-        value: showSSAO,
-        onChange: (v) => setShowSSAO(v),
-      },
-    },
-    { collapsed: true },
-  );
 
   const SceneClearer: FC = () => {
     const { scene } = useThree();
@@ -184,7 +166,7 @@ const Viewer: React.FC<ViewerProps> = ({ surfaceData }) => {
           />
         )}
       </Bounds>
-      {showSSAO && <Effects />}
+      <Effects />
     </Canvas>
   );
 };
