@@ -1,5 +1,6 @@
 """Test main application endpoints."""
 
+import asyncio
 import os
 import uuid
 
@@ -46,3 +47,20 @@ async def test_generate_demo_bracket(app):
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/octet-stream"
+
+
+async def make_get_demo_request(app):
+    """Helper function to make a single /get-demo request."""
+    async with AsyncClient(app=app, base_url=BASE_URL) as ac:
+        response = await ac.get("/get-demo")
+    return response
+
+
+@pytest.mark.asyncio
+async def test_multiple_get_demo_requests(app):
+    """Test making 10 simultaneous /get-demo requests."""
+    tasks = [make_get_demo_request(app) for _ in range(10)]
+    responses = await asyncio.gather(*tasks)
+    for response in responses:
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "application/octet-stream"

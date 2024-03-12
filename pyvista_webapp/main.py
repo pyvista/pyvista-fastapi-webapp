@@ -26,6 +26,9 @@ LOG.setLevel("DEBUG")
 
 BASE_DIR = Path(__file__).resolve().parent
 
+MAX_WORKERS = 1
+EXECUTOR_POOL = ProcessPoolExecutor(max_workers=MAX_WORKERS)
+
 
 def vf_from_bytes(content: bytes) -> Tuple[np.ndarray, np.ndarray]:
     vertex_count = int.from_bytes(content[:4], "little")
@@ -117,9 +120,8 @@ def tetrahedralize(vertices, faces):
 
 async def async_tetrahedralize(vertices, faces):
     loop = asyncio.get_running_loop()
-    with ProcessPoolExecutor() as executor:
-        future = loop.run_in_executor(executor, tetrahedralize, vertices, faces)
-        tetra_points, tetra_cells = await future
+    future = loop.run_in_executor(EXECUTOR_POOL, tetrahedralize, vertices, faces)
+    tetra_points, tetra_cells = await future
     return tetra_points, tetra_cells
 
 
@@ -201,9 +203,8 @@ async def generate_demo_bracket_async() -> bytes:
 
     mesh = pv.Cube()
     loop = asyncio.get_running_loop()
-    with ProcessPoolExecutor() as executor:
-        future = loop.run_in_executor(executor, tetrahedralize_mesh, mesh)
-        data = await future
+    future = loop.run_in_executor(EXECUTOR_POOL, tetrahedralize_mesh, mesh)
+    data = await future
     return data
 
 
