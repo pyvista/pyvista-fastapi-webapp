@@ -1,0 +1,54 @@
+# Compiled source #
+###################
+*.pyc
+*.pyd
+*.c
+*.cpp
+*.so
+
+# OS generated files #
+######################
+.fuse_hidden*
+*~
+
+# Pip generated folders #
+#########################
+build/
+dist/
+
+# documentation
+Documentation/
+mkdoc
+mkpdf
+notes
+_autosummary/
+
+# temp files
+\#*
+.\#*
+
+
+# Testing #
+#########################
+.venv
+.coverage
+*,cover
+.pytest_cache/
+htmlcov/
+logs/
+.cache
+flycheck*.py
+.hypothesis
+files/
+db/
+
+# profiling
+###########
+functional_tests/
+
+# wheels
+wheels/
+wheelhouse/
+
+# scripts
+*.sh

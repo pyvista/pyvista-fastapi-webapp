@@ -1,0 +1,41 @@
+{
+  "name": "pyvista-frontend",
+  "version": "0.1.0",
+  "description": "PyVista demo web application frontend.",
+  "private": true,
+  "author": "Alex Kaszynski <akascap@gmail.com> (https://github.com/akaszynski)",
+  "repository": "github:pyvista/pyvista-webapp-fastapi",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build && rm -rf ../pyvista_webapp/frontend/ && mv out ../pyvista_webapp/frontend/",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.99.0",
+    "@react-three/fiber": "^8.15.16",
+    "@react-three/postprocessing": "^2.16.2",
+    "axios": "^1.6.7",
+    "leva": "^0.9.35",
+    "next": "14.1.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "three": "^0.161.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/three": "^0.161.2",
+    "@types/uuid": "^9.0.8",
+    "autoprefixer": "^10.4.17",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "identity-obj-proxy": "^3.0.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
