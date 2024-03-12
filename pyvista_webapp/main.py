@@ -5,12 +5,11 @@ from pathlib import Path
 import time
 from concurrent.futures import ProcessPoolExecutor
 
-
-from fastapi import FastAPI, HTTPException, Response, WebSocket, WebSocketDisconnect
+import asyncio
+from fastapi import FastAPI, HTTPException, Response, WebSocket, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 import pytetwild
@@ -29,11 +28,11 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 def vf_from_bytes(content: bytes) -> Tuple[np.ndarray, np.ndarray]:
-    vertex_count = int.from_bytes(content[:4], 'little')
+    vertex_count = int.from_bytes(content[:4], "little")
     offset = 4
 
     # Assuming vertices are stored as Float32, 3 coordinates per vertex
-    vertices_bytes = content[offset:offset + vertex_count * 12]  # 12 bytes per vertex (3 floats)
+    vertices_bytes = content[offset : offset + vertex_count * 12]  # 12 bytes per vertex (3 floats)
     vertices = np.frombuffer(vertices_bytes, dtype=np.float32).reshape((vertex_count, 3))
     offset += vertex_count * 12  # 4 bytes and x, y, z per vertex
 
@@ -107,11 +106,21 @@ if ENABLE_TIMING:
 
 def tetrahedralize(vertices, faces):
     try:
-        tetra_points, tetra_cells = pytetwild.tetrahedralize(vertices.astype(np.float64), faces, edge_length_fac=0.1, optimize=True)
+        tetra_points, tetra_cells = pytetwild.tetrahedralize(
+            vertices.astype(np.float64), faces, edge_length_fac=0.1, optimize=True
+        )
         return tetra_points, tetra_cells
-    except Exception as e:
-        LOG.exception('Failed to tetrahedralize')
+    except Exception:
+        LOG.exception("Failed to tetrahedralize")
         return None, None
+
+
+async def async_tetrahedralize(vertices, faces):
+    loop = asyncio.get_running_loop()
+    with ProcessPoolExecutor() as executor:
+        future = loop.run_in_executor(executor, tetrahedralize, vertices, faces)
+        tetra_points, tetra_cells = await future
+    return tetra_points, tetra_cells
 
 
 app.add_middleware(
@@ -146,6 +155,11 @@ async def serve_frontend():
     return FileResponse(BASE_DIR / "frontend/index.html")
 
 
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check():
+    return {"status": "ok"}
+
+
 @app.post("/gen-tetra")
 async def generate_tetrahedral_mesh(request: Request, response_class=Response) -> Response:
     content = await request.body()
@@ -155,13 +169,10 @@ async def generate_tetrahedral_mesh(request: Request, response_class=Response) -
     # import pyvista
     # pyvista.make_tri_mesh(vertices, faces).plot()
 
-    # generate the tetrahedra using a process as this might segfault
-    with ProcessPoolExecutor() as executor:
-        future = executor.submit(tetrahedralize, vertices, faces)
-        tetra_points, tetra_cells = future.result()
+    tetra_points, tetra_cells = await async_tetrahedralize(vertices, faces)
 
     if tetra_points is None:
-        raise HTTPException(status_code=500, detail='Failed to tetrahedralize')
+        raise HTTPException(status_code=500, detail="Failed to tetrahedralize")
 
     cells = np.hstack(
         [
@@ -174,20 +185,33 @@ async def generate_tetrahedral_mesh(request: Request, response_class=Response) -
     mesh_out = grid.explode(1).extract_surface()
     mesh_out = mesh_out.explode(0).extract_surface()  # separate edges for SSAO
     data = mesh_to_bytes(mesh_out)
-    
+
     return Response(content=data, media_type="application/octet-stream")
 
 
-@app.get('/get-demo')
-async def generate_demo_bracket() -> Response:
-    """Return a demo 'exploded' grid."""
-    mesh = pv.Cube()
-    # mesh = pv.Icosphere()
-    # mesh = examples.download_aero_bracket().extract_surface()
-
+def tetrahedralize_mesh(mesh):
     grid = pytetwild.tetrahedralize_pv(mesh, edge_length_fac=0.1, optimize=True)
-
     mesh_out = grid.explode(1).extract_surface()
     mesh_out = mesh_out.explode(0).extract_surface()  # separate edges for SSAO
-    data = mesh_to_bytes(mesh_out)
-    return Response(content=data, media_type="application/octet-stream")
+    return mesh_to_bytes(mesh_out)
+
+
+async def generate_demo_bracket_async() -> bytes:
+    import pyvista as pv
+
+    mesh = pv.Cube()
+    loop = asyncio.get_running_loop()
+    with ProcessPoolExecutor() as executor:
+        future = loop.run_in_executor(executor, tetrahedralize_mesh, mesh)
+        data = await future
+    return data
+
+
+@app.get("/get-demo")
+async def generate_demo_bracket_endpoint() -> Response:
+    """Return a demo 'exploded' grid."""
+    try:
+        data = await generate_demo_bracket_async()
+        return Response(content=data, media_type="application/octet-stream")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to process mesh")

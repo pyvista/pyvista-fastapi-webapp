@@ -41,6 +41,7 @@ flycheck*.py
 .hypothesis
 files/
 db/
+__tracked_surface.stl
 
 # profiling
 ###########

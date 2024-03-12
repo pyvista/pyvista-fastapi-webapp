@@ -93,7 +93,7 @@ Running these commands will install all necessary frontend dependencies and star
 
 ### Generating the Static Pages
 
-Changes to the `frontend/` directory will not be reflected in the 
+Changes to the `frontend/` directory will not be reflected in the
 
 ```
 yarn run build

@@ -8,30 +8,27 @@ authors = [
         {name = "Alex Kaszynski", email = "akascap@gmail.com"},
 ]
 description = "PyVista web application using FastAPI, React, and Next.js."
-home-page = "https://github.com/pyvista/pyvista-demo-webapp"
+home-page = "https://github.com/pyvista/pyvista-fastapi-webapp"
 requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: Other/Proprietary License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Framework :: FastAPI",
 ]
 description-file = "README.md"
 dynamic = ["version"]
 license = {file = "LICENSE"}
 dependencies = [
-    "aiofiles==23.2.1",
     "click",
-    "fast-simplification==0.1.6",
-    "fastapi[all]==0.109.0",
+    "fastapi[all]>=0.109.0",
     "pytetwild>=0.1.dev1",
-    "python-multipart==0.0.6",
-    "sqlalchemy==2.0.25",
-    "streaming_form_data==1.13.0",
+    "pyvista>=0.43.0",
     "uvicorn==0.26.0"
 ]
 

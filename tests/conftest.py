@@ -9,4 +9,5 @@ import pytest
 @pytest.fixture
 def app():
     from pyvista_webapp.main import app
+
     return app
