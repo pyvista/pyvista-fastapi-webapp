@@ -1,13 +1,18 @@
-import { useControls } from 'leva'
-import React, { useEffect, useRef, useState, FC } from 'react';
-import * as THREE from 'three';
-import { Canvas, useThree } from '@react-three/fiber';
-import { TrackballControls, Bounds, useBounds, Center } from '@react-three/drei';
+import { useControls } from "leva";
+import React, { useEffect, useRef, useState, FC } from "react";
+import * as THREE from "three";
+import { Canvas, useThree } from "@react-three/fiber";
+import {
+  TrackballControls,
+  Bounds,
+  useBounds,
+  Center,
+} from "@react-three/drei";
 import { EffectComposer, SSAO } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
-import { EdgesGeometry, LineBasicMaterial, LineSegments } from 'three';
-import { getBackendUrl } from '../utils/backendUrl';
-import { SurfaceData } from './FileLoader';
+import { EdgesGeometry, LineBasicMaterial, LineSegments } from "three";
+import { getBackendUrl } from "../utils/backendUrl";
+import { SurfaceData } from "./FileLoader";
 
 function Effects() {
   return (
@@ -41,14 +46,18 @@ type MeshComponentProps = {
   faces: Uint32Array;
   visible: boolean;
   showEdges: boolean;
-}
+};
 
 function hasDisposeMethod(object: any): object is { dispose: () => void } {
-  return typeof object.dispose === 'function'
+  return typeof object.dispose === "function";
 }
 
-
-const MeshComponent: FC<MeshComponentProps> = ({ vertices, faces, visible, showEdges }) => {
+const MeshComponent: FC<MeshComponentProps> = ({
+  vertices,
+  faces,
+  visible,
+  showEdges,
+}) => {
   const meshRef = useRef<THREE.Mesh | null>(null);
   const edgesRef = useRef<THREE.LineSegments>();
   const { camera, scene } = useThree();
@@ -57,12 +66,14 @@ const MeshComponent: FC<MeshComponentProps> = ({ vertices, faces, visible, showE
 
   useEffect(() => {
     const geometry = new THREE.BufferGeometry();
-    const material = new THREE.MeshPhongMaterial(
-      { color: 0xffffff, flatShading: true, side: THREE.DoubleSide}
-    );
+    const material = new THREE.MeshPhongMaterial({
+      color: 0xffffff,
+      flatShading: true,
+      side: THREE.DoubleSide,
+    });
     // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
 
     geometry.setIndex(new THREE.BufferAttribute(faces, 1));
     geometry.computeVertexNormals();
@@ -76,11 +87,14 @@ const MeshComponent: FC<MeshComponentProps> = ({ vertices, faces, visible, showE
     // Create edges for the mesh
     if (showEdges) {
       const edgesGeometry = new EdgesGeometry(geometry, -0.0); // Generate edges from the mesh
-      const edgesMaterial = new LineBasicMaterial({ color: 0x000000, linewidth: 1 });
+      const edgesMaterial = new LineBasicMaterial({
+        color: 0x000000,
+        linewidth: 1,
+      });
       const edges = new LineSegments(edgesGeometry, edgesMaterial);
-      console.log('edges:', edges)
+      console.log("edges:", edges);
       edgesRef.current = edges;
-      scene.add(edges)
+      scene.add(edges);
     }
 
     // Simply center mesh and then update the camera bounds
@@ -89,16 +103,14 @@ const MeshComponent: FC<MeshComponentProps> = ({ vertices, faces, visible, showE
     if (boundingBox) {
       const center = new THREE.Vector3();
       boundingBox.getCenter(center);
-      geometry.center()
+      geometry.center();
     }
     bounds.refresh().clip().fit();
 
     if (meshRef.current) {
       scene.add(meshRef.current);
     }
-
   }, [vertices, faces]);
-
 
   useEffect(() => {
     if (meshRef.current) {
@@ -112,40 +124,43 @@ const MeshComponent: FC<MeshComponentProps> = ({ vertices, faces, visible, showE
   return <mesh ref={meshRef} />;
 };
 
-
 type ViewerProps = {
   surfaceData: SurfaceData;
-}
+};
 
-const Viewer: React.FC<ViewerProps> = ({surfaceData}) => {
+const Viewer: React.FC<ViewerProps> = ({ surfaceData }) => {
   const [showSurface, setShowSurface] = useState(true);
   const [showSSAO, setShowSSAO] = useState(true);
   const [showEdges, setShowEdges] = useState(false);
 
-  useControls('View Settings', {
-    'Show Surface': {
-      value: showSurface,
-      onChange: (v) => setShowSurface(v),
+  useControls(
+    "View Settings",
+    {
+      "Show Surface": {
+        value: showSurface,
+        onChange: (v) => setShowSurface(v),
+      },
+      SSAO: {
+        value: showSSAO,
+        onChange: (v) => setShowSSAO(v),
+      },
     },
-    'SSAO': {
-      value: showSSAO,
-      onChange: (v) => setShowSSAO(v),
-    },
-  }, { collapsed: true });
-
+    { collapsed: true },
+  );
 
   const SceneClearer: FC = () => {
     const { scene } = useThree();
 
     useEffect(() => {
-      const nonLightObjects = scene.children.filter(child => !(child instanceof THREE.Light));
+      const nonLightObjects = scene.children.filter(
+        (child) => !(child instanceof THREE.Light),
+      );
 
-        // Call dispose if available for each object
-        nonLightObjects.forEach(object => {
-          if (hasDisposeMethod(object)) object.dispose();
-          scene.remove(object);
-        });
-
+      // Call dispose if available for each object
+      nonLightObjects.forEach((object) => {
+        if (hasDisposeMethod(object)) object.dispose();
+        scene.remove(object);
+      });
     }, [, scene]);
 
     return null;
@@ -156,16 +171,22 @@ const Viewer: React.FC<ViewerProps> = ({surfaceData}) => {
   return (
     <Canvas>
       <SceneClearer />
-      <perspectiveCamera/>
+      <perspectiveCamera />
       <Lights />
       <TrackballControls rotateSpeed={3.0} />
       <Bounds fit clip observe margin={1.2}>
-        {hasVertices && <MeshComponent vertices={surfaceData.vertices} faces={surfaceData.faces} visible={showSurface} showEdges={false} />}
+        {hasVertices && (
+          <MeshComponent
+            vertices={surfaceData.vertices}
+            faces={surfaceData.faces}
+            visible={showSurface}
+            showEdges={false}
+          />
+        )}
       </Bounds>
       {showSSAO && <Effects />}
     </Canvas>
   );
 };
-
 
 export default Viewer;

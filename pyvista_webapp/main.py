@@ -6,11 +6,10 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 
 
-from fastapi import FastAPI, HTTPException, Response, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Response, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 import pytetwild
@@ -29,11 +28,11 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 def vf_from_bytes(content: bytes) -> Tuple[np.ndarray, np.ndarray]:
-    vertex_count = int.from_bytes(content[:4], 'little')
+    vertex_count = int.from_bytes(content[:4], "little")
     offset = 4
 
     # Assuming vertices are stored as Float32, 3 coordinates per vertex
-    vertices_bytes = content[offset:offset + vertex_count * 12]  # 12 bytes per vertex (3 floats)
+    vertices_bytes = content[offset : offset + vertex_count * 12]  # 12 bytes per vertex (3 floats)
     vertices = np.frombuffer(vertices_bytes, dtype=np.float32).reshape((vertex_count, 3))
     offset += vertex_count * 12  # 4 bytes and x, y, z per vertex
 
@@ -107,10 +106,12 @@ if ENABLE_TIMING:
 
 def tetrahedralize(vertices, faces):
     try:
-        tetra_points, tetra_cells = pytetwild.tetrahedralize(vertices.astype(np.float64), faces, edge_length_fac=0.1, optimize=True)
+        tetra_points, tetra_cells = pytetwild.tetrahedralize(
+            vertices.astype(np.float64), faces, edge_length_fac=0.1, optimize=True
+        )
         return tetra_points, tetra_cells
-    except Exception as e:
-        LOG.exception('Failed to tetrahedralize')
+    except Exception:
+        LOG.exception("Failed to tetrahedralize")
         return None, None
 
 
@@ -161,7 +162,7 @@ async def generate_tetrahedral_mesh(request: Request, response_class=Response) -
         tetra_points, tetra_cells = future.result()
 
     if tetra_points is None:
-        raise HTTPException(status_code=500, detail='Failed to tetrahedralize')
+        raise HTTPException(status_code=500, detail="Failed to tetrahedralize")
 
     cells = np.hstack(
         [
@@ -174,11 +175,11 @@ async def generate_tetrahedral_mesh(request: Request, response_class=Response) -
     mesh_out = grid.explode(1).extract_surface()
     mesh_out = mesh_out.explode(0).extract_surface()  # separate edges for SSAO
     data = mesh_to_bytes(mesh_out)
-    
+
     return Response(content=data, media_type="application/octet-stream")
 
 
-@app.get('/get-demo')
+@app.get("/get-demo")
 async def generate_demo_bracket() -> Response:
     """Return a demo 'exploded' grid."""
     mesh = pv.Cube()
