@@ -6,7 +6,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor
 
 import asyncio
-from fastapi import FastAPI, HTTPException, Response, WebSocket
+from fastapi import FastAPI, HTTPException, Response, WebSocket, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -153,6 +153,11 @@ app.mount("/static", StaticFiles(directory=static_pages), name="app")
 @app.head("/")
 async def serve_frontend():
     return FileResponse(BASE_DIR / "frontend/index.html")
+
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check():
+    return {"status": "ok"}
 
 
 @app.post("/gen-tetra")

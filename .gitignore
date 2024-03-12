@@ -41,7 +41,7 @@ flycheck*.py
 .hypothesis
 files/
 db/
-__tracked_surface.stl  # temp file from ftetwild
+__tracked_surface.stl
 
 # profiling
 ###########

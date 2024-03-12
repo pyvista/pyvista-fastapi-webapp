@@ -14,6 +14,16 @@ BASE_URL = "http://test"
 
 
 @pytest.mark.asyncio
+async def test_health(app):
+    """Test the /health endpoint."""
+    async with AsyncClient(app=app, base_url=BASE_URL) as ac:
+        response = await ac.get("/health")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
+@pytest.mark.asyncio
 async def test_generate_tetrahedral_mesh(app):
     """Test the /gen-tetra endpoint with a simple cube mesh."""
     mesh = pv.Cube().triangulate()
