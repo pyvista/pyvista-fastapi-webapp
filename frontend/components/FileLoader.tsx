@@ -190,17 +190,18 @@ const FileLoader: React.FC<FileLoaderProps> = ({ setSurfaceData }) => {
     setSurfaceData({ vertices: new Float32Array(), faces: new Uint32Array() });
   };
 
+  // <button
+  //   type="button"
+  //   className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-lg px-4 py-2 bg-white text-base text-gray-700 hover:bg-gray-100 mr-2"
+  //   style={{ whiteSpace: "nowrap", textAlign: "center" }}
+  //   onClick={handleLoadSurfaceClicked}
+  // >
+  //   Import Surface
+  // </button>
+
   return (
     <div className="relative inline-block text-left p-4">
       <div className="flex justify-start items-center">
-        <button
-          type="button"
-          className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-lg px-4 py-2 bg-white text-base text-gray-700 hover:bg-gray-100 mr-2"
-          style={{ whiteSpace: "nowrap", textAlign: "center" }}
-          onClick={handleLoadSurfaceClicked}
-        >
-          Import Surface
-        </button>
         <button
           type="button"
           className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-lg px-4 py-2 bg-white text-base text-gray-700 hover:bg-gray-100 mr-2"
