@@ -1,8 +1,14 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12-slim
+FROM ubuntu:22.04
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
+
+# Install Python and pip
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the current directory contents into the container at /usr/src/app
 COPY . .

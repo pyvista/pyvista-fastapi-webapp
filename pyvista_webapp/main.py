@@ -26,7 +26,7 @@ LOG.setLevel("DEBUG")
 
 BASE_DIR = Path(__file__).resolve().parent
 
-MAX_WORKERS = 1
+MAX_WORKERS = 10
 EXECUTOR_POOL = ProcessPoolExecutor(max_workers=MAX_WORKERS)
 
 
@@ -112,7 +112,8 @@ def tetrahedralize(vertices, faces):
         tetra_points, tetra_cells = pytetwild.tetrahedralize(
             vertices.astype(np.float64), faces, edge_length_fac=0.1, optimize=True
         )
-        return tetra_points, tetra_cells
+        LOG.info("Finished with pytetwild")
+        return tetra_points.copy(), tetra_cells.copy()
     except Exception:
         LOG.exception("Failed to tetrahedralize")
         return None, None
@@ -162,38 +163,38 @@ async def health_check():
     return {"status": "ok"}
 
 
-@app.post("/gen-tetra")
-async def generate_tetrahedral_mesh(request: Request, response_class=Response) -> Response:
-    content = await request.body()
-    vertices, faces = vf_from_bytes(content)
+# @app.post("/gen-tetra")
+# async def generate_tetrahedral_mesh(request: Request, response_class=Response) -> Response:
+#     content = await request.body()
+#     vertices, faces = vf_from_bytes(content)
 
-    # debug, plot pyvista surface
-    # import pyvista
-    # pyvista.make_tri_mesh(vertices, faces).plot()
+#     # debug, plot pyvista surface
+#     # import pyvista
+#     # pyvista.make_tri_mesh(vertices, faces).plot()
 
-    tetra_points, tetra_cells = await async_tetrahedralize(vertices, faces)
+#     tetra_points, tetra_cells = await async_tetrahedralize(vertices, faces)
 
-    if tetra_points is None:
-        raise HTTPException(status_code=500, detail="Failed to tetrahedralize")
+#     if tetra_points is None:
+#         raise HTTPException(status_code=500, detail="Failed to tetrahedralize")
 
-    cells = np.hstack(
-        [
-            np.full((tetra_cells.shape[0], 1), 4, dtype=np.int32),
-            tetra_cells,
-        ]
-    )
-    cell_types = np.full(tetra_cells.shape[0], 10, dtype=np.uint8)
-    grid = pv.UnstructuredGrid(cells, cell_types, tetra_points)
-    mesh_out = grid.explode(1).extract_surface()
-    mesh_out = mesh_out.explode(0).extract_surface()  # separate edges for SSAO
-    data = mesh_to_bytes(mesh_out)
+#     cells = np.hstack(
+#         [
+#             np.full((tetra_cells.shape[0], 1), 4, dtype=np.int32),
+#             tetra_cells,
+#         ]
+#     )
+#     cell_types = np.full(tetra_cells.shape[0], 10, dtype=np.uint8)
+#     grid = pv.UnstructuredGrid(cells, cell_types, tetra_points)
+#     mesh_out = grid.explode(0.5).extract_surface()
+#     mesh_out = mesh_out.explode(0).extract_surface()  # separate edges for SSAO
+#     data = mesh_to_bytes(mesh_out)
 
-    return Response(content=data, media_type="application/octet-stream")
+#     return Response(content=data, media_type="application/octet-stream")
 
 
 def tetrahedralize_mesh(mesh):
     grid = pytetwild.tetrahedralize_pv(mesh, edge_length_fac=0.1, optimize=True)
-    mesh_out = grid.explode(1).extract_surface()
+    mesh_out = grid.explode(0.5).extract_surface()
     mesh_out = mesh_out.explode(0).extract_surface()  # separate edges for SSAO
     return mesh_to_bytes(mesh_out)
 
