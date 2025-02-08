@@ -55,8 +55,8 @@ To run the PyVista Web App, you need to clone the repository, install dependenci
 First, clone the PyVista Web App repository from GitHub:
 
 ```bash
-git clone https://github.com/pyvista/pyvista-demo-webapp
-cd pyvista-webapp
+git clone https://github.com/pyvista/pyvista-fastapi-webapp
+cd pyvista-fastapi-webapp
 ```
 
 ### Installation
@@ -65,7 +65,6 @@ To install the necessary dependencies for the PyVista web app, run:
 
 ```
 pip install .
-
 ```
 
 ### Launching the Application
@@ -82,8 +81,7 @@ You can access it through your web browser at `localhost:8000`
 
 The `frontend/` directory contains the frontend part of the application. If you're interested in developing the frontend, navigate to the `frontend/` directory and use the following commands to get started. This assumes you have the LTS of node installed and yarn installed:
 
-
-```
+```bash
 cd frontend
 yarn install
 yarn run dev
