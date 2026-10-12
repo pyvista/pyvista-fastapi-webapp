@@ -1,19 +1,18 @@
-from typing import Tuple
-import numpy as np
+import asyncio
 import logging
-from pathlib import Path
 import time
 from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
 
-import asyncio
+import numpy as np
+import pytetwild
+import pyvista as pv
 from fastapi import FastAPI, HTTPException, Response, WebSocket, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-import pytetwild
-import pyvista as pv
 
 ENABLE_TIMING = False
 
@@ -30,7 +29,7 @@ MAX_WORKERS = 10
 EXECUTOR_POOL = ProcessPoolExecutor(max_workers=MAX_WORKERS)
 
 
-def vf_from_bytes(content: bytes) -> Tuple[np.ndarray, np.ndarray]:
+def vf_from_bytes(content: bytes) -> tuple[np.ndarray, np.ndarray]:
     vertex_count = int.from_bytes(content[:4], "little")
     offset = 4
 
